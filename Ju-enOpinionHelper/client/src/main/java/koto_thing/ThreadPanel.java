@@ -1,7 +1,6 @@
 package koto_thing;
 
 import com.google.gson.Gson;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,15 +23,17 @@ public class ThreadPanel extends JPanel {
     private JTextArea opinionContentArea;
     private Runnable onBackAction;
     private Map<Integer, Boolean> expandedStates;
+    private AppSettings settings;
     
     private String currentUserId = "default-user";
 
-    public ThreadPanel(String topicName, Long topicId, Runnable onBackAction) {
+    public ThreadPanel(String topicName, Long topicId, Runnable onBackAction, AppSettings settings) {
         this.topicName = topicName;
         this.topicId = topicId;
         this.opinions = TopicManager.getInstance().getOpinions(topicName);
         this.onBackAction = onBackAction;
         this.expandedStates = new HashMap<>();
+        this.settings = settings;
 
         setLayout(new BorderLayout());
 
@@ -133,11 +134,13 @@ public class ThreadPanel extends JPanel {
                 title.replace("\"", "\\\""),
                 content.replace("\"", "\\\""));
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080/api/topics/" + topicId + "/opinions"))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(json))
-                .build();
+        HttpRequest request = AuthHelper.addAuthHeader(
+                HttpRequest.newBuilder()
+                    .uri(URI.create(settings.getServerUrl() + "/api/topics/" + topicId + "/opinions"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json)),
+                settings
+        ).build();
 
         client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(HttpResponse::body)
@@ -167,10 +170,12 @@ public class ThreadPanel extends JPanel {
 
     private void loadOpinions() {
         HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080/api/topics/" + topicId + "/opinions"))
-                .GET()
-                .build();
+        HttpRequest request = AuthHelper.addAuthHeader(
+                HttpRequest.newBuilder()
+                    .uri(URI.create(settings.getServerUrl() + "/api/topics/" + topicId + "/opinions"))
+                    .GET(),
+                settings
+        ).build();
 
         client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(HttpResponse::body)
@@ -296,12 +301,14 @@ public class ThreadPanel extends JPanel {
 
         HttpClient client = HttpClient.newHttpClient();
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080/api/topics/" + topicId +
-                        "/opinions/" + opinion.getId() + "/juen?userId=" + currentUserId))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.noBody())
-                .build();
+        HttpRequest request = AuthHelper.addAuthHeader(
+                HttpRequest.newBuilder()
+                    .uri(URI.create(settings.getServerUrl() + "/api/topics/" + topicId +
+                            "/opinions/" + opinion.getId() + "/juen?userId=" + currentUserId))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.noBody()),
+                settings
+        ).build();
 
         client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(HttpResponse::body)
@@ -340,11 +347,13 @@ public class ThreadPanel extends JPanel {
         }
         
         HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080/api/topics/" + topicId +
-                        "/opinions/" + opinion.getId()))
-                .DELETE()
-                .build();
+        HttpRequest request = AuthHelper.addAuthHeader(
+                HttpRequest.newBuilder()
+                    .uri(URI.create(settings.getServerUrl() + "/api/topics/" + topicId +
+                            "/opinions/" + opinion.getId()))
+                    .DELETE(),
+                settings
+        ).build();
 
         client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenAccept(response -> {

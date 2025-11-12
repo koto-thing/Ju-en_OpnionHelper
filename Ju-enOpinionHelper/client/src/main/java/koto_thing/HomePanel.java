@@ -1,7 +1,6 @@
 package koto_thing;
 
 import com.google.gson.Gson;
-import org.apache.coyote.Response;
 
 import javax.swing.*;
 import java.awt.*;
@@ -134,11 +133,13 @@ public class HomePanel extends JPanel {
             HttpClient client = HttpClient.newHttpClient();
             String json = String.format("{\"name\":\"%s\"}", topicTitle);
 
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(settings.getServerUrl() + "/api/topics"))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(json))
-                    .build();
+            HttpRequest request = AuthHelper.addAuthHeader(
+                    HttpRequest.newBuilder()
+                        .uri(URI.create(settings.getServerUrl() + "/api/topics"))
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(json)),
+                    settings
+            ).build();
 
             client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                     .thenApply(response -> {
@@ -187,10 +188,12 @@ public class HomePanel extends JPanel {
         }
 
         HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(settings.getServerUrl() + "/api/topics/" + topic.getId()))
-                .DELETE()
-                .build();
+        HttpRequest request = AuthHelper.addAuthHeader(
+                HttpRequest.newBuilder()
+                    .uri(URI.create(settings.getServerUrl() + "/api/topics/" + topic.getId()))
+                    .DELETE(),
+                settings
+        ).build();
 
         client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenAccept(response -> {
@@ -220,7 +223,8 @@ public class HomePanel extends JPanel {
                 topic.getId(),
                 () -> {
                     cardLayout.show(mainPanel, "TOPIC_LIST");
-                }
+                },
+                settings
         );
         mainPanel.add(threadPanel, "THREAD_" + topic.getId());
         cardLayout.show(mainPanel, "THREAD_" + topic.getId());
@@ -236,10 +240,12 @@ public class HomePanel extends JPanel {
     private void loadTopics() {
         System.out.println("Loading topics...");
         HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(settings.getServerUrl() + "/api/topics"))
-                .GET()
-                .build();
+        HttpRequest request = AuthHelper.addAuthHeader(
+                HttpRequest.newBuilder()
+                    .uri(URI.create(settings.getServerUrl() + "/api/topics"))
+                    .GET(),
+                settings
+        ).build();
 
         client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(HttpResponse::body)

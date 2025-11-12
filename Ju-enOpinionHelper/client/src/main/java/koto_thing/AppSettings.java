@@ -93,7 +93,23 @@ public class AppSettings {
     public void setJuenNotificationEnabled(boolean enabled) {
         properties.setProperty("juenNotificationEnabled", String.valueOf(enabled));
     }
-    
+
+    public String getAuthUsername() {
+        return properties.getProperty("authUsername", "admin");
+    }
+
+    public void setAuthUsername(String username) {
+        properties.setProperty("authUsername", username);
+    }
+
+    public String getAuthPassword() {
+        return properties.getProperty("authPassword", "");
+    }
+
+    public void setAuthPassword(String password) {
+        properties.setProperty("authPassword", password);
+    }
+
     public void save() {
         try (FileOutputStream out = new FileOutputStream(SETTINGS_FILE)) {
             properties.store(out, "Ju-en Opinion Helper Settings");

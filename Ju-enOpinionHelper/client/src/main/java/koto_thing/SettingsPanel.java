@@ -1,7 +1,5 @@
 package koto_thing;
 
-import org.springframework.boot.autoconfigure.web.reactive.WebFluxAutoConfiguration;
-
 import javax.swing.*;
 import java.awt.*;
 
@@ -14,6 +12,8 @@ public class SettingsPanel extends JPanel {
     private JCheckBox autoRefreshCheckBox;
     private JCheckBox notificationCheckBox;
     private JCheckBox juenNotificationCheckBox;
+    private JTextField authUsernameField;
+    private JPasswordField authPasswordField;
     private AppSettings settings;
 
     public SettingsPanel() {
@@ -56,6 +56,9 @@ public class SettingsPanel extends JPanel {
         juenNotificationCheckBox = new JCheckBox("Ju-en通知を表示");
         JPanel juenNotificationPanel = createSettingPanel("", juenNotificationCheckBox);
 
+        // 認証設定
+        JPanel authPanel = createSettingPanel("認証情報:", createAuthPanel());
+
         contentPanel.add(userPanel);
         contentPanel.add(Box.createVerticalStrut(15));
         contentPanel.add(serverPanel);
@@ -71,6 +74,8 @@ public class SettingsPanel extends JPanel {
         contentPanel.add(notificationPanel);
         contentPanel.add(Box.createVerticalStrut(10));
         contentPanel.add(juenNotificationPanel);
+        contentPanel.add(Box.createVerticalStrut(10));
+        contentPanel.add(authPanel);
         contentPanel.add(Box.createVerticalGlue());
 
         // ボタンパネル
@@ -101,6 +106,20 @@ public class SettingsPanel extends JPanel {
         return panel;
     }
 
+    private JPanel createAuthPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+        authUsernameField = new JTextField(20);
+        authPasswordField = new JPasswordField(20);
+
+        panel.add(authUsernameField);
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(authPasswordField);
+
+        return panel;
+    }
+
     private void saveSettings() {
         try {
             settings.setUserId(userIdField.getText());
@@ -111,6 +130,8 @@ public class SettingsPanel extends JPanel {
             settings.setAutoRefreshInterval((Integer) refreshSpinner.getValue());
             settings.setNotificationEnabled(notificationCheckBox.isSelected());
             settings.setJuenNotificationEnabled(juenNotificationCheckBox.isSelected());
+            settings.setAuthUsername(authUsernameField.getText());
+            settings.setAuthPassword(new String(authPasswordField.getPassword()));
             settings.save();
 
             JOptionPane.showMessageDialog(this,
@@ -134,6 +155,8 @@ public class SettingsPanel extends JPanel {
         refreshSpinner.setValue(settings.getAutoRefreshInterval());
         notificationCheckBox.setSelected(settings.isNotificationEnabled());
         juenNotificationCheckBox.setSelected(settings.isJuenNotificationEnabled());
+        authUsernameField.setText(settings.getAuthUsername());
+        authPasswordField.setText(settings.getAuthPassword());
     }
 
     private void resetSettings() {
@@ -151,6 +174,8 @@ public class SettingsPanel extends JPanel {
             refreshSpinner.setValue(30);
             notificationCheckBox.setSelected(true);
             juenNotificationCheckBox.setSelected(true);
+            authUsernameField.setText("");
+            authPasswordField.setText("");
         }
     }
     
