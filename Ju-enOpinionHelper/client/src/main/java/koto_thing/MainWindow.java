@@ -7,9 +7,6 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
-import java.beans.JavaBean;
-import java.beans.XMLDecoder;
-import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -129,10 +126,7 @@ public class MainWindow extends JFrame {
         client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(HttpResponse::body)
                 .thenAccept(this::updateTopicList)
-                .exceptionally(e -> {
-                    e.printStackTrace();
-                    return null;
-                });
+                .exceptionally(e -> null);
     }
     
     public AppSettings getSettings(){
@@ -147,10 +141,8 @@ public class MainWindow extends JFrame {
                 List<Topic> topics = gson.fromJson(jsonResponse, listType);
 
                 homePanel.updateTopics(topics);
-                System.out.println("トピック数: " + topics.size());
             } catch (Exception e) {
                 System.err.println("JSONパースエラー: " + e.getMessage());
-                e.printStackTrace();
             }
         });
     }

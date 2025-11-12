@@ -142,11 +142,7 @@ public class HomePanel extends JPanel {
             ).build();
 
             client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                    .thenApply(response -> {
-                        System.out.println("Status code: " + response.statusCode());
-                        System.out.println("Response body: " + response.body());
-                        return response.body();
-                    })
+                    .thenApply(HttpResponse::body)
                     .thenAccept(response -> {
                         SwingUtilities.invokeLater(() -> {
                             topicInputField.setText("");
@@ -165,7 +161,6 @@ public class HomePanel extends JPanel {
                     })
                     .exceptionally(e -> {
                         SwingUtilities.invokeLater(() -> {
-                            e.printStackTrace();
                             JOptionPane.showMessageDialog(this,
                                     "トピックの追加に失敗しました。\n" + e.getMessage(),
                                     "エラー",
@@ -207,7 +202,6 @@ public class HomePanel extends JPanel {
                 })
                 .exceptionally(e -> {
                     SwingUtilities.invokeLater(() -> {
-                        e.printStackTrace();
                         JOptionPane.showMessageDialog(this,
                                 "トピックの削除に失敗しました。",
                                 "削除エラー",
@@ -238,11 +232,6 @@ public class HomePanel extends JPanel {
     }
 
     private void loadTopics() {
-        System.out.println("Loading topics...");
-        System.out.println("Server URL: " + settings.getServerUrl());
-        System.out.println("Username: " + settings.getAuthUsername());
-        System.out.println("Password: " + (settings.getAuthPassword() != null && !settings.getAuthPassword().isEmpty() ? "[SET]" : "[EMPTY]"));
-        
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = AuthHelper.addAuthHeader(
                 HttpRequest.newBuilder()
@@ -253,8 +242,6 @@ public class HomePanel extends JPanel {
 
         client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(response -> {
-                    System.out.println("HTTP Status: " + response.statusCode());
-                    System.out.println("Response body: " + response.body());
                     if (response.statusCode() == 401) {
                         SwingUtilities.invokeLater(() -> {
                             JOptionPane.showMessageDialog(this,
@@ -269,7 +256,6 @@ public class HomePanel extends JPanel {
                 })
                 .thenApply(HttpResponse::body)
                 .thenAccept(response -> {
-                    System.out.println("Received topics: " + response);
                     SwingUtilities.invokeLater(() -> {
                         try {
                             Gson gson = new Gson();
@@ -298,8 +284,6 @@ public class HomePanel extends JPanel {
                     });
                 })
                 .exceptionally(e -> {
-                    System.out.println("Failed to load topics: " + e.getMessage());
-                    e.printStackTrace();
                     SwingUtilities.invokeLater(() -> {
                         JOptionPane.showMessageDialog(this,
                             "トピックの取得に失敗しました:\n" + e.getMessage(),
@@ -361,7 +345,6 @@ public class HomePanel extends JPanel {
             int interval = settings.getAutoRefreshInterval() * 1000; // 秒をミリ秒に変換
             autoRefreshTimer = new Timer(interval, e -> loadTopics());
             autoRefreshTimer.start();
-            System.out.println("自動更新を開始: " + settings.getAutoRefreshInterval() + "秒間隔");
         }
     }
 
@@ -372,7 +355,6 @@ public class HomePanel extends JPanel {
     public void stopAutoRefresh() {
         if (autoRefreshTimer != null) {
             autoRefreshTimer.stop();
-            System.out.println("自動更新を停止しました");
         }
     }
 }

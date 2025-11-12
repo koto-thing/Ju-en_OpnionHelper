@@ -115,7 +115,7 @@ public class AppSettings {
             properties.store(out, "Ju-en Opinion Helper Settings");
             notifyChangeListeners();
         } catch (Exception e) {
-            e.printStackTrace();
+            // エラーを無視
         }
     }
     
@@ -124,7 +124,6 @@ public class AppSettings {
             properties.load(inputStream);
         } catch (Exception e) {
             // ファイルが存在しない場合は無視
-            System.out.println("Settings file not found, using default settings.");
         }
     }
 }

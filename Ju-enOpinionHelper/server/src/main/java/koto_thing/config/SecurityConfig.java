@@ -1,6 +1,5 @@
 package koto_thing.config;
 
-import koto_thing.AuthenticationLoggingFilter;
 import koto_thing.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -13,14 +12,10 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    
-    @Autowired
-    private AuthenticationLoggingFilter authenticationLoggingFilter;
     
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
@@ -32,10 +27,8 @@ public class SecurityConfig {
             .cors(cors -> cors.configure(http))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/register").permitAll()
-                .requestMatchers("/api/debug/**").permitAll()
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(authenticationLoggingFilter, BasicAuthenticationFilter.class)
             .httpBasic(basic -> {});
 
         return http.build();
@@ -51,13 +44,6 @@ public class SecurityConfig {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
-        
-        // デバッグログを追加
-        System.out.println("=== DaoAuthenticationProvider Configured ===");
-        System.out.println("UserDetailsService: " + userDetailsService.getClass().getName());
-        System.out.println("PasswordEncoder: " + passwordEncoder().getClass().getName());
-        System.out.println("==========================================");
-        
         return authProvider;
     }
     

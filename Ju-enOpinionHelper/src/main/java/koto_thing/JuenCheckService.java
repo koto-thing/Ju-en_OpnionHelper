@@ -34,14 +34,12 @@ public class JuenCheckService {
         if (settings.isJuenNotificationEnabled()) {
             checkTimer = new Timer(30000, e -> checkForNewJuens());
             checkTimer.start();
-            System.out.println("Juen check service started.");
         }
     }
     
     public void stopChecking() {
         if (checkTimer != null) {
             checkTimer.stop();
-            System.out.println("Juen check service stopped.");
         }
     }
     

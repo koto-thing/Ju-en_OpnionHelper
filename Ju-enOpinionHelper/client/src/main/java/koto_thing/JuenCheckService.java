@@ -34,14 +34,12 @@ public class JuenCheckService {
         if (settings.isJuenNotificationEnabled()) {
             checkTimer = new Timer(30000, e -> checkForNewJuens());
             checkTimer.start();
-            System.out.println("Juen check service started.");
         }
     }
     
     public void stopChecking() {
         if (checkTimer != null) {
             checkTimer.stop();
-            System.out.println("Juen check service stopped.");
         }
     }
     
@@ -59,10 +57,7 @@ public class JuenCheckService {
         httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(HttpResponse::body)
                 .thenAccept(this::processOpinions)
-                .exceptionally(e -> {
-                    System.err.println("Ju-enチェックエラー: " + e.getMessage());
-                    return null;
-                });
+                .exceptionally(e -> null);
     }
 
     private void processOpinions(String jsonResponse) {
@@ -75,7 +70,7 @@ public class JuenCheckService {
                 checkOpinionJuens(opinion);
             }
         } catch (Exception e) {
-            System.err.println("オピニオン処理エラー: " + e.getMessage());
+            // エラーを無視
         }
     }
 

@@ -147,7 +147,6 @@ public class MainWindow extends JFrame {
                 List<Topic> topics = gson.fromJson(jsonResponse, listType);
 
                 homePanel.updateTopics(topics);
-                System.out.println("トピック数: " + topics.size());
             } catch (Exception e) {
                 System.err.println("JSONパースエラー: " + e.getMessage());
                 e.printStackTrace();

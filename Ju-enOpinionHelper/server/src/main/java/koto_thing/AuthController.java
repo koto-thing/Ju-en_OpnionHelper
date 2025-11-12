@@ -53,15 +53,5 @@ public class AuthController {
             .collect(Collectors.toList());
         return ResponseEntity.ok(users);
     }
-    
-    @GetMapping("/debug/user-exists")
-    public ResponseEntity<?> checkUserExists(@RequestParam String username) {
-        boolean exists = userRepository.existsByUsername(username);
-        Map<String, Object> result = new HashMap<>();
-        result.put("username", username);
-        result.put("exists", exists);
-        result.put("totalUsers", userRepository.count());
-        return ResponseEntity.ok(result);
-    }
 }
 
