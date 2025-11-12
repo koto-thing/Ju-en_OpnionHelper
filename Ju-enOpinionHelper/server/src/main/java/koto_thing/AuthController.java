@@ -5,7 +5,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -40,7 +43,25 @@ public class AuthController {
     
     @GetMapping("/users")
     public ResponseEntity<?> getUsers() {
-        return ResponseEntity.ok(userRepository.findAll());
+        List<Map<String, Object>> users = userRepository.findAll().stream()
+            .map(user -> {
+                Map<String, Object> userInfo = new HashMap<>();
+                userInfo.put("id", user.getId());
+                userInfo.put("username", user.getUsername());
+                return userInfo;
+            })
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(users);
+    }
+    
+    @GetMapping("/debug/user-exists")
+    public ResponseEntity<?> checkUserExists(@RequestParam String username) {
+        boolean exists = userRepository.existsByUsername(username);
+        Map<String, Object> result = new HashMap<>();
+        result.put("username", username);
+        result.put("exists", exists);
+        result.put("totalUsers", userRepository.count());
+        return ResponseEntity.ok(result);
     }
 }
 
