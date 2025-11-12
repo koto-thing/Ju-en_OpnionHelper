@@ -1,5 +1,5 @@
 ﻿[phases.setup]
-nixPkgs = ['openjdk21']
+nixPkgs = ['jdk']
 
 [phases.build]
 cmds = ['chmod +x gradlew', './gradlew clean build -x test']
