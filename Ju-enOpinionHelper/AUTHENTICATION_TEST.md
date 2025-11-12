@@ -1,11 +1,40 @@
 # データベース管理認証のテストガイド
 
+## ⚠️ 重要: 管理者パスワードの設定
+
+### Railway デプロイ前の必須設定
+
+1. Railway Dashboard → プロジェクトを選択
+2. **Variables** タブをクリック
+3. 以下の環境変数を追加:
+
+```env
+ADMIN_PASSWORD=your-strong-secure-password
+```
+
+**パスワードの要件:**
+- 最低16文字以上推奨
+- 大文字・小文字・数字・記号を含む
+- 例: `MyTeamSecure2025!@#`
+
+### 環境変数未設定の場合
+
+起動時にランダムパスワードが生成されます:
+
+```
+WARNING: ADMIN_PASSWORD not set!
+Generated random admin password: Xy8$mK2pQ9#vL5nR
+IMPORTANT: Save this password immediately!
+```
+
+**このパスワードは二度と表示されません。必ず保存してください。**
+
 ## 自動作成される管理者アカウント
 
 サーバー起動時に以下のアカウントが自動作成されます:
 
 - **ユーザー名**: `admin`
-- **パスワード**: `admin123`
+- **パスワード**: 環境変数 `ADMIN_PASSWORD` の値
 
 ## テスト手順
 

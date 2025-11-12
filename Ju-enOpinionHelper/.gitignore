@@ -9,6 +9,14 @@ build/
 *.mv.db
 *.trace.db
 
+### Security & Environment ###
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+secrets/
+
 ### IntelliJ IDEA ###
 .idea/modules.xml
 .idea/jarRepositories.xml
