@@ -11,7 +11,7 @@ COPY . .
 RUN chmod +x gradlew
 
 # Gradle をキャッシュしてビルド（ネットワークエラー対策）
-RUN --mount=type=cache,target=/root/.gradle \
+RUN --mount=type=cache,id=gradle,target=/root/.gradle \
     ./gradlew clean build -x test --no-daemon --stacktrace || \
     (sleep 5 && ./gradlew clean build -x test --no-daemon --stacktrace)
 
