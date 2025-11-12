@@ -1,5 +1,25 @@
-﻿.gradle
-build
-.idea
+﻿# Build artifacts
+build/
+.gradle/
+bin/
+
+# IDE
+.idea/
+.vscode/
 *.iml
-.git
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+data/
+*.mv.db
+*.trace.db
+
+# Logs
+*.log
+
+# Scripts
+Scripts/
+
