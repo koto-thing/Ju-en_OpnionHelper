@@ -1,4 +1,4 @@
-﻿package koto_thing.config;
+package koto_thing.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,12 +13,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())  // REST APIのためCSRFを無効化
-            .cors(cors -> cors.configure(http))  // CORSを有効化
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configure(http))
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().authenticated()  // すべてのリクエストに認証を要求
+                .anyRequest().authenticated()
             )
-            .httpBasic(basic -> {});  // Basic認証を有効化
+            .httpBasic(basic -> {});
 
         return http.build();
     }
