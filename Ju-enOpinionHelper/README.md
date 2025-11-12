@@ -1,6 +1,33 @@
-﻿# Ju-en Opinion Helper
+﻿Ju-en Opinion Helper
 
 ゲーム開発における意見共有ツール。チーム間でトピックとオピニオンを共有し、Ju-enリアクションで同意を表現できます。
+
+## 主な機能
+
+- 📝 **トピック管理**: プロジェクトごとにトピックを作成・管理
+- 💬 **オピニオン投稿**: 各トピックに意見を投稿
+- 👍 **Ju-enカウント**: 同意する意見にリアクション
+- 🔒 **ユーザー認証**: データベース管理による複数ユーザー対応
+- 🌐 **リアルタイム同期**: Railway でのクラウドデプロイ
+
+## 認証システム
+
+### 初回起動時
+
+サーバー起動時に管理者アカウントが自動作成されます:
+
+- **ユーザー名**: `admin`
+- **パスワード**: `admin123`
+
+### 新規ユーザーの追加
+
+```bash
+curl -X POST https://your-server-url/api/register \
+  -H "Content-Type: application/json" \
+  -d '{"username":"your-username","password":"your-password"}'
+```
+
+詳細は [AUTHENTICATION_TEST.md](./AUTHENTICATION_TEST.md) を参照してください。
 
 ## プロジェクト構成
 
