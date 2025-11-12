@@ -10,10 +10,9 @@ COPY . .
 # Gradle Wrapper に実行権限を付与
 RUN chmod +x gradlew
 
-# Gradle をキャッシュしてビルド（ネットワークエラー対策）
-RUN --mount=type=cache,id=gradle,target=/root/.gradle \
-    ./gradlew clean build -x test --no-daemon --stacktrace || \
-    (sleep 5 && ./gradlew clean build -x test --no-daemon --stacktrace)
+# Gradleビルド（リトライロジック付き）
+RUN ./gradlew clean build -x test --no-daemon --stacktrace || \
+    (echo "First build failed, retrying in 5 seconds..." && sleep 5 && ./gradlew clean build -x test --no-daemon --stacktrace)
 
 # 実行用の軽量イメージ
 FROM eclipse-temurin:21-jre-alpine
