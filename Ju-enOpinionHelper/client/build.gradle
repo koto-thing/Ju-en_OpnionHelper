@@ -1,7 +1,6 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.2.1'
-    id 'io.spring.dependency-management' version '1.1.4'
+    id 'application'
 }
 
 group = 'com.koto-thing'
@@ -13,28 +12,39 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'com.h2database:h2'
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'com.formdev:flatlaf:3.1'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
-tasks.named('test') {
+application {
+    mainClass = 'koto_thing.Main'
+}
+
+test {
     useJUnitPlatform()
 }
 
-bootJar {
-    archiveFileName = 'JuenOpinionHelper.jar'
-    mainClass = 'koto_thing.JuenOpinionHelperApplication'
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'koto_thing.Main',
+                'Implementation-Version': version,
+                'Implementation-Title': 'Ju-en Opinion Helper'
+        )
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
 
 tasks.register('createInstaller') {
-    dependsOn bootJar
+    dependsOn jar
 
     doLast {
-        def jarFile = file("${buildDir}/libs/JuenOpinionHelper.jar")
+        def jarFile = jar.outputs.files.singleFile
         def installerDir = file("${buildDir}/installer")
         installerDir.mkdirs()
 
@@ -43,6 +53,7 @@ tasks.register('createInstaller') {
                     '--input', jarFile.parent,
                     '--name', 'JuenOpinionHelper',
                     '--main-jar', jarFile.name,
+                    '--main-class', 'koto_thing.Main',
                     '--type', 'msi',
                     '--app-version', version,
                     '--vendor', 'koto-thing',
@@ -52,11 +63,10 @@ tasks.register('createInstaller') {
                     '--win-shortcut',
                     '--win-menu-group', 'Ju-en Opinion Helper',
                     '--java-options', '-Xmx512m',
-                    '--runtime-image', System.getProperty('java.home'),  // JREを同梱
-                    '--win-console',  // コンソールウィンドウを非表示
-                    '--win-per-user-install'  // ユーザー単位でインストール
+                    '--runtime-image', System.getProperty('java.home')
         }
 
         println "インストーラーが作成されました: ${installerDir.absolutePath}"
     }
 }
+
