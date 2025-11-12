@@ -2,14 +2,16 @@
 WORKDIR /build
 
 # ルートの Gradle Wrapper をコピー
-COPY ../gradlew ./gradlew
-COPY ../gradlew.bat ./gradlew.bat
-COPY ../gradle ./gradle
+COPY gradlew .
+COPY gradlew.bat .
+COPY gradle gradle
+
+# ルートの settings.gradle をコピー (存在する場合)
+COPY settings.gradle .
 
 # server のビルドファイルをコピー
-COPY build.gradle .
-COPY settings.gradle .
-COPY src ./src
+COPY server/build.gradle .
+COPY server/src src
 
 # アプリケーションをビルド
 RUN chmod +x gradlew
