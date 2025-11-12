@@ -239,6 +239,10 @@ public class HomePanel extends JPanel {
 
     private void loadTopics() {
         System.out.println("Loading topics...");
+        System.out.println("Server URL: " + settings.getServerUrl());
+        System.out.println("Username: " + settings.getAuthUsername());
+        System.out.println("Password: " + (settings.getAuthPassword() != null && !settings.getAuthPassword().isEmpty() ? "[SET]" : "[EMPTY]"));
+        
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = AuthHelper.addAuthHeader(
                 HttpRequest.newBuilder()
@@ -248,6 +252,21 @@ public class HomePanel extends JPanel {
         ).build();
 
         client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenApply(response -> {
+                    System.out.println("HTTP Status: " + response.statusCode());
+                    System.out.println("Response body: " + response.body());
+                    if (response.statusCode() == 401) {
+                        SwingUtilities.invokeLater(() -> {
+                            JOptionPane.showMessageDialog(this,
+                                "認証に失敗しました。ユーザー名とパスワードを確認してください。\n" +
+                                "ユーザー名: " + settings.getAuthUsername(),
+                                "認証エラー",
+                                JOptionPane.ERROR_MESSAGE);
+                        });
+                        throw new RuntimeException("Authentication failed (401)");
+                    }
+                    return response;
+                })
                 .thenApply(HttpResponse::body)
                 .thenAccept(response -> {
                     System.out.println("Received topics: " + response);
@@ -271,11 +290,22 @@ public class HomePanel extends JPanel {
                             lastUpdatedLabel.setText("最終更新: " + now.format(formatter));
                         } catch (Exception e) {
                             e.printStackTrace();
+                            JOptionPane.showMessageDialog(this,
+                                "トピックの解析に失敗しました: " + e.getMessage(),
+                                "エラー",
+                                JOptionPane.ERROR_MESSAGE);
                         }
                     });
                 })
                 .exceptionally(e -> {
                     System.out.println("Failed to load topics: " + e.getMessage());
+                    e.printStackTrace();
+                    SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(this,
+                            "トピックの取得に失敗しました:\n" + e.getMessage(),
+                            "接続エラー",
+                            JOptionPane.ERROR_MESSAGE);
+                    });
                     return null;
                 });
     }
