@@ -1,19 +1,10 @@
 ﻿FROM eclipse-temurin:21-jdk-alpine AS build
-WORKDIR /build
+WORKDIR /app
 
-# ルートの Gradle Wrapper をコピー
-COPY gradlew .
-COPY gradlew.bat .
-COPY gradle gradle
+# server ディレクトリ全体をコピー
+COPY . .
 
-# ルートの settings.gradle をコピー (存在する場合)
-COPY settings.gradle .
-
-# server のビルドファイルをコピー
-COPY server/build.gradle .
-COPY server/src src
-
-# アプリケーションをビルド
+# Gradle Wrapper に実行権限を付与してビルド
 RUN chmod +x gradlew
 RUN ./gradlew clean build -x test
 
@@ -22,7 +13,7 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
 # ビルド成果物をコピー
-COPY --from=build /build/build/libs/JuenOpinionHelper.jar app.jar
+COPY --from=build /app/build/libs/opinion-helper-server.jar app.jar
 
 # ポートを公開
 EXPOSE 8080
