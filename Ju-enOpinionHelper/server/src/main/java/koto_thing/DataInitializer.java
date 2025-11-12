@@ -17,10 +17,15 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         // 環境変数から管理者パスワードを取得（未設定の場合はランダム生成）
         String adminPassword = System.getenv("ADMIN_PASSWORD");
-        
         System.out.println("=================================");
         System.out.println("DataInitializer: Starting...");
         System.out.println("ADMIN_PASSWORD env var set: " + (adminPassword != null && !adminPassword.isEmpty()));
+        
+        // デバッグ: 実際のパスワード値を表示
+        if (adminPassword != null) {
+            System.out.println("ADMIN_PASSWORD value: '" + adminPassword + "'");
+            System.out.println("ADMIN_PASSWORD length: " + adminPassword.length());
+        }
         
         if (!userRepository.existsByUsername("admin")) {
             // 新規作成
@@ -35,6 +40,7 @@ public class DataInitializer implements CommandLineRunner {
                 System.err.println("IMPORTANT: Save this password immediately!");
             } else {
                 System.out.println("Using ADMIN_PASSWORD from environment variable");
+                System.out.println("Password to be encoded: '" + adminPassword + "'");
             }
             
             admin.setPassword(passwordEncoder.encode(adminPassword));
@@ -48,9 +54,21 @@ public class DataInitializer implements CommandLineRunner {
             
             if (adminPassword != null && !adminPassword.isEmpty()) {
                 User admin = userRepository.findByUsername("admin").orElseThrow();
-                admin.setPassword(passwordEncoder.encode(adminPassword));
+                String oldPasswordHash = admin.getPassword();
+                String newPasswordHash = passwordEncoder.encode(adminPassword);
+                
+                System.out.println("Updating password...");
+                System.out.println("  New password (plain): '" + adminPassword + "'");
+                System.out.println("  Old hash prefix: " + oldPasswordHash.substring(0, 20));
+                System.out.println("  New hash prefix: " + newPasswordHash.substring(0, 20));
+                
+                admin.setPassword(newPasswordHash);
                 userRepository.save(admin);
                 System.out.println("Admin password updated from ADMIN_PASSWORD environment variable");
+                
+                // 検証: パスワードが正しくマッチするか確認
+                boolean matches = passwordEncoder.matches(adminPassword, admin.getPassword());
+                System.out.println("  Password verification: " + (matches ? "SUCCESS" : "FAILED"));
             } else {
                 System.out.println("ADMIN_PASSWORD not set - keeping existing password");
             }
