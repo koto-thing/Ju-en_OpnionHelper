@@ -1,4 +1,4 @@
-﻿package koto_thing;
+package koto_thing;
 
 import java.net.http.HttpRequest;
 import java.util.Base64;

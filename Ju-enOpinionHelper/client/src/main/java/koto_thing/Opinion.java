@@ -1,4 +1,4 @@
-﻿package koto_thing;
+package koto_thing;
 
 import java.util.HashSet;
 import java.util.Set;
