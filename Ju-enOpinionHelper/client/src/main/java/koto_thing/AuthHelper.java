@@ -34,10 +34,12 @@ public class AuthHelper {
         System.out.println("Username: " + username);
         System.out.println("Password is set: " + (password != null && !password.isEmpty()));
         System.out.println("Password length: " + (password != null ? password.length() : 0));
+        System.out.println("Password value: '" + password + "'");
         
         if (username != null && !username.isEmpty() && password != null && !password.isEmpty()) {
             String authHeader = createBasicAuthHeader(username, password);
-            System.out.println("Auth header created: " + authHeader.substring(0, Math.min(20, authHeader.length())) + "...");
+            System.out.println("Full auth header: " + authHeader);
+            System.out.println("Expected: Basic YWRtaW46YWRtaW4xMjM0");
             builder.header("Authorization", authHeader);
         } else {
             System.out.println("WARNING: No auth header added! Username or password is empty.");
