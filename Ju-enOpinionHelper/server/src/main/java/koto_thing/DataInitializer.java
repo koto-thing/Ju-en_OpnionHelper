@@ -49,26 +49,35 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println("  Username: admin");
             System.out.println("  Password: " + (adminPassword.length() > 0 ? "[SET]" : "[EMPTY]"));
         } else {
-            // 既存ユーザーが存在する場合、環境変数が設定されていればパスワードを更新
+            // 既存ユーザーが存在する場合、環境変数が設定されていればパスワードを検証/更新
             System.out.println("Admin user already exists");
             
             if (adminPassword != null && !adminPassword.isEmpty()) {
                 User admin = userRepository.findByUsername("admin").orElseThrow();
-                String oldPasswordHash = admin.getPassword();
-                String newPasswordHash = passwordEncoder.encode(adminPassword);
                 
-                System.out.println("Updating password...");
-                System.out.println("  New password (plain): '" + adminPassword + "'");
-                System.out.println("  Old hash prefix: " + oldPasswordHash.substring(0, 20));
-                System.out.println("  New hash prefix: " + newPasswordHash.substring(0, 20));
+                // パスワードが既に一致しているか確認
+                boolean passwordMatches = passwordEncoder.matches(adminPassword, admin.getPassword());
+                System.out.println("Current password matches ADMIN_PASSWORD: " + passwordMatches);
                 
-                admin.setPassword(newPasswordHash);
-                userRepository.save(admin);
-                System.out.println("Admin password updated from ADMIN_PASSWORD environment variable");
-                
-                // 検証: パスワードが正しくマッチするか確認
-                boolean matches = passwordEncoder.matches(adminPassword, admin.getPassword());
-                System.out.println("  Password verification: " + (matches ? "SUCCESS" : "FAILED"));
+                if (!passwordMatches) {
+                    String oldPasswordHash = admin.getPassword();
+                    String newPasswordHash = passwordEncoder.encode(adminPassword);
+                    
+                    System.out.println("Updating password...");
+                    System.out.println("  New password (plain): '" + adminPassword + "'");
+                    System.out.println("  Old hash prefix: " + oldPasswordHash.substring(0, 20));
+                    System.out.println("  New hash prefix: " + newPasswordHash.substring(0, 20));
+                    
+                    admin.setPassword(newPasswordHash);
+                    userRepository.save(admin);
+                    System.out.println("Admin password updated from ADMIN_PASSWORD environment variable");
+                    
+                    // 検証: パスワードが正しくマッチするか確認
+                    boolean matches = passwordEncoder.matches(adminPassword, admin.getPassword());
+                    System.out.println("  Password verification after update: " + (matches ? "SUCCESS" : "FAILED"));
+                } else {
+                    System.out.println("Password already correct - no update needed");
+                }
             } else {
                 System.out.println("ADMIN_PASSWORD not set - keeping existing password");
             }
