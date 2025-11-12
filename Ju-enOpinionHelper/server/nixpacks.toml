@@ -1,8 +1,8 @@
 ﻿[phases.setup]
-nixPkgs = ['...', 'jdk21']
+nixPkgs = ['jdk21']
 
 [phases.build]
-cmds = ['./gradlew clean build -x test']
+cmds = ['chmod +x gradlew', './gradlew clean build -x test']
 
 [start]
 cmd = 'java -jar build/libs/opinion-helper-server.jar'
