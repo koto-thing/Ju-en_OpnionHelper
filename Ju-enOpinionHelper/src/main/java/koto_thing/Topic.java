@@ -1,5 +1,6 @@
 package koto_thing;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -13,14 +14,16 @@ public class Topic {
     
     private String name;
     
-    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL)
+    @JsonBackReference
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Opinion> opinions = new ArrayList<>();
     
     public Topic() {
         
     }
     
-    public Topic(String name){
+    public Topic(Long id, String name){
+        this.id = id;
         this.name = name;
     }
     
@@ -51,5 +54,10 @@ public class Topic {
     public void addOpinion(Opinion opinion) {
         opinions.add(opinion);
         opinion.setTopic(this);
+    }
+    
+    @Override
+    public String toString() {
+        return name;
     }
 }
