@@ -109,4 +109,3 @@ java -jar build/libs/client-1.0.0.jar
 ## ライセンス
 
 MIT License
-
