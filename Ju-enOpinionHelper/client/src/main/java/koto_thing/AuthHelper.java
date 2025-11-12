@@ -30,9 +30,19 @@ public class AuthHelper {
         String username = settings.getAuthUsername();
         String password = settings.getAuthPassword();
         
+        System.out.println("=== AuthHelper ===");
+        System.out.println("Username: " + username);
+        System.out.println("Password is set: " + (password != null && !password.isEmpty()));
+        System.out.println("Password length: " + (password != null ? password.length() : 0));
+        
         if (username != null && !username.isEmpty() && password != null && !password.isEmpty()) {
-            builder.header("Authorization", createBasicAuthHeader(username, password));
+            String authHeader = createBasicAuthHeader(username, password);
+            System.out.println("Auth header created: " + authHeader.substring(0, Math.min(20, authHeader.length())) + "...");
+            builder.header("Authorization", authHeader);
+        } else {
+            System.out.println("WARNING: No auth header added! Username or password is empty.");
         }
+        System.out.println("==================");
         
         return builder;
     }
