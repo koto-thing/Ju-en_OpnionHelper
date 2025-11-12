@@ -23,6 +23,7 @@ public class DataInitializer implements CommandLineRunner {
         System.out.println("ADMIN_PASSWORD env var set: " + (adminPassword != null && !adminPassword.isEmpty()));
         
         if (!userRepository.existsByUsername("admin")) {
+            // 新規作成
             User admin = new User();
             admin.setUsername("admin");
             
@@ -42,7 +43,17 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println("  Username: admin");
             System.out.println("  Password: " + (adminPassword.length() > 0 ? "[SET]" : "[EMPTY]"));
         } else {
-            System.out.println("Admin user already exists - skipping creation");
+            // 既存ユーザーが存在する場合、環境変数が設定されていればパスワードを更新
+            System.out.println("Admin user already exists");
+            
+            if (adminPassword != null && !adminPassword.isEmpty()) {
+                User admin = userRepository.findByUsername("admin").orElseThrow();
+                admin.setPassword(passwordEncoder.encode(adminPassword));
+                userRepository.save(admin);
+                System.out.println("Admin password updated from ADMIN_PASSWORD environment variable");
+            } else {
+                System.out.println("ADMIN_PASSWORD not set - keeping existing password");
+            }
         }
         
         // 全ユーザーを表示
