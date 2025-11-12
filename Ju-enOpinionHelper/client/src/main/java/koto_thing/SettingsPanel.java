@@ -123,14 +123,21 @@ public class SettingsPanel extends JPanel {
     private void saveSettings() {
         try {
             settings.setUserId(userIdField.getText());
-            settings.setServerUrl(serverUrlField.getText());
+            
+            // サーバーURLの末尾のスラッシュを削除
+            String serverUrl = serverUrlField.getText().trim();
+            if (serverUrl.endsWith("/")) {
+                serverUrl = serverUrl.substring(0, serverUrl.length() - 1);
+            }
+            settings.setServerUrl(serverUrl);
+            
             settings.setFontSize((Integer) fontSizeSpinner.getValue());
             settings.setTheme((String) themeComboBox.getSelectedItem());
             settings.setAutoRefreshEnabled(autoRefreshCheckBox.isSelected());
             settings.setAutoRefreshInterval((Integer) refreshSpinner.getValue());
             settings.setNotificationEnabled(notificationCheckBox.isSelected());
             settings.setJuenNotificationEnabled(juenNotificationCheckBox.isSelected());
-            settings.setAuthUsername(authUsernameField.getText());
+            settings.setAuthUsername(authUsernameField.getText().trim());
             settings.setAuthPassword(new String(authPasswordField.getPassword()));
             settings.save();
 
