@@ -7,6 +7,7 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
+import java.beans.JavaBean;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -21,10 +22,14 @@ public class MainWindow extends JFrame {
     private JPanel rightPanel;
     private HomePanel homePanel;
     private SettingsPanel settingsPanel;
+    private InfoPanel infoPanel;
     private AppSettings settings;
     private NotificationManager notificationManager;
     private JuenCheckService juenCheckService;
-    
+
+    /**
+     * コンストラクタ
+     */
     public MainWindow(){
         settings = new AppSettings();
         
@@ -62,10 +67,12 @@ public class MainWindow extends JFrame {
         // 各コンテンツパネルを作成して右側パネルに追加
         homePanel = new HomePanel(settings);
         settingsPanel = new SettingsPanel();
+        infoPanel = new InfoPanel();
         
         // 右側パネルに各コンテンツパネルを追加
         rightPanel.add(homePanel, "ホーム");
         rightPanel.add(settingsPanel, "設定");
+        rightPanel.add(infoPanel, "情報");
         
         // JSplitPaneで左右のパネルを結合する
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
@@ -76,8 +83,8 @@ public class MainWindow extends JFrame {
         
         /* 通知パネルをレイヤーペインに追加する */
         JLayeredPane layeredPane = getLayeredPane();
-        JPanel notifPanel = notificationManager.getNotificationPanel();
-        layeredPane.add(notifPanel, JLayeredPane.POPUP_LAYER);
+        JPanel notifyPanel = notificationManager.getNotificationPanel();
+        layeredPane.add(notifyPanel, JLayeredPane.POPUP_LAYER);
         
         // ウィンドウサイズ変更時に通知パネルの位置を更新する
         addComponentListener(new java.awt.event.ComponentAdapter() {
@@ -115,7 +122,10 @@ public class MainWindow extends JFrame {
         updatedCheckTimer.setRepeats(false);
         updatedCheckTimer.start();
     }
-    
+
+    /**
+     * トピック一覧をサーバーから取得してホームパネルを更新する
+     */
     public void loadTopics() {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
@@ -129,10 +139,18 @@ public class MainWindow extends JFrame {
                 .exceptionally(e -> null);
     }
     
+    /**
+     * アプリケーション設定を取得する
+     * @return AppSettingsオブジェクト
+     */
     public AppSettings getSettings(){
         return settings;
     }
 
+    /**
+     * トピック一覧をホームパネルに反映する
+     * @param jsonResponse サーバーからのJSONレスポンス
+     */
     private void updateTopicList(String jsonResponse) {
         SwingUtilities.invokeLater(() -> {
             try {
@@ -141,12 +159,20 @@ public class MainWindow extends JFrame {
                 List<Topic> topics = gson.fromJson(jsonResponse, listType);
 
                 homePanel.updateTopics(topics);
+                if (infoPanel != null) {
+                    infoPanel.setTopicCount(topics.size());
+                    infoPanel.setLastSync(java.time.LocalDateTime.now());
+                    infoPanel.setConnectionStatus(true);
+                }
             } catch (Exception e) {
                 System.err.println("JSONパースエラー: " + e.getMessage());
             }
         });
     }
 
+    /**
+     * 現在のテーマ設定をウィンドウに適用する
+     */
     private void applyTheme() {
         Theme theme = settings.getTheme().equals("Dark")
                 ? Theme.getDarkTheme()
@@ -156,22 +182,35 @@ public class MainWindow extends JFrame {
         rightPanel.setBackground(theme.getBackgroundColor());
     }
     
+    /**
+     * 通知パネルの位置を更新する
+     */
     private void updateNotificationPanelPosition() {
-        JPanel notifPanel = notificationManager.getNotificationPanel();
+        JPanel notifyPanel = notificationManager.getNotificationPanel();
         int x = getWidth() - 320;
         int y = 10;
-        notifPanel.setBounds(x, y, 310, getHeight() - 20);
+        notifyPanel.setBounds(x, y, 310, getHeight() - 20);
     }
     
+    /**
+     * 通知マネージャーを取得する
+     * @return NotificationManagerオブジェクト
+     */
     public NotificationManager getNotificationManager() {
         return notificationManager;
     }
     
+    /**
+     * Ju-enチェックサービスを再起動する
+     */
     private void restartJuenCheck() {
         juenCheckService.stopChecking();
         juenCheckService.startChecking();
     }
     
+    /**
+     * ウィンドウが閉じられるときの処理
+     */
     @Override
     public void dispose() {
         if (juenCheckService != null){
